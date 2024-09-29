@@ -1,0 +1,1 @@
+from .vllm_qwen2vl import vLLM_Qwen2_VL
