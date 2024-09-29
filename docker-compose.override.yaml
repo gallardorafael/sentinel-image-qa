@@ -1,0 +1,4 @@
+services:
+  sentinel-image-qa:
+    volumes:
+      - "absolute-path-to-your-datasets:absolute-path-to-your-datasets"
