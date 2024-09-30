@@ -4,7 +4,7 @@ import streamlit as st
 import streamlit_cropper
 from PIL import Image
 
-from vlm import HF_Qwen2_VL
+from vlm import HF_Qwen2_Chatbot
 
 logging.basicConfig(level=logging.INFO)
 
@@ -23,7 +23,7 @@ def _recommended_box2(img: Image, aspect_ratio: tuple) -> dict:
 
 @st.cache_resource
 def init_llm():
-    llm = HF_Qwen2_VL()
+    llm = HF_Qwen2_Chatbot()
     return llm
 
 
@@ -40,9 +40,21 @@ class ImageQA_GUI:
         st.sidebar.image("assets/sentinel_logo_white.png", use_column_width=True)
 
         # file uploader
+        if "uploader_key" not in st.session_state:
+            st.session_state.uploader_key = 0
         st.session_state["input_image"] = st.sidebar.file_uploader(
-            "Chose image to analyze...", type="jpeg"
+            "Chose image to analyze...",
+            type="jpeg",
+            key=f"uploader_{st.session_state.uploader_key}",
         )
+
+        # reset button
+        if st.sidebar.button("Reset history"):
+            self.llm.reset_chat_context()
+            st.session_state["input_image"] = None
+            st.session_state["pil_image"] = None
+            st.session_state["messages"] = []
+            self._update_uploader_key()
 
     def init_main(self):
         st.markdown(
@@ -68,6 +80,9 @@ class ImageQA_GUI:
             """,
             unsafe_allow_html=True,
         )
+        # chat history
+        if "messages" not in st.session_state:
+            st.session_state.messages = []
 
         # this returns a file-like object
         if st.session_state["input_image"] is not None:
@@ -79,21 +94,31 @@ class ImageQA_GUI:
             new_height = int((new_width / width) * height)
             uploaded_img = uploaded_img.resize((new_width, new_height))
 
-            with st.empty():
-                st.image(uploaded_img, use_column_width=True)
-
             st.session_state["pil_image"] = uploaded_img
+            st.session_state.messages.append({"role": "user", "content": uploaded_img})
+            # update uploader key to avoid multiple messages
+            self._update_uploader_key()
 
-        with st.form("my_form"):
-            question = st.text_area("Enter your question:")
-            submitted = st.form_submit_button("Submit")
+        # showing all the messages
+        for message in st.session_state.messages:
+            with st.chat_message(message["role"]):
+                if isinstance(message["content"], Image.Image):
+                    st.image(message["content"])
+                elif isinstance(message["content"], str):
+                    st.markdown(message["content"])
 
-            if question and submitted:
-                answer = self.llm.generate(st.session_state["pil_image"], question)
+        if prompt := st.chat_input("Ask anything"):
+            st.session_state.messages.append({"role": "user", "content": prompt})
+            with st.chat_message("user"):
+                st.markdown(prompt)
 
-                # Display the question and response in a chatbot-style box
-                st.chat_message("user").write(question)
-                st.chat_message("assistant").write(answer)
+            with st.chat_message("assistant"):
+                response = self.llm.chat(prompt, image=st.session_state.get("pil_image"))
+                st.write(response)
+            st.session_state.messages.append({"role": "assistant", "content": response})
+
+    def _update_uploader_key(self):
+        st.session_state.uploader_key += 1
 
 
 if __name__ == "__main__":
