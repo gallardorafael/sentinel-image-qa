@@ -1,0 +1,38 @@
+# This docker compose file corresponds to the hotfix container with vLLM and Sentinel Streamlit App
+# in the same container, this is temporal until Qwen2-VL ls ready for OpenAI compatible serving
+# Check Note #4 here: https://github.com/vllm-project/vllm/pull/7905
+# Once Qwen2-VL is ready, I will split the Sentinel container from the vLLM container
+# so we have a clear client (Sentinel Streamlit App) and server (vLLM with Qwen2-VL OpenAI API) separation
+# with intented usage similar to: https://docs.vllm.ai/en/latest/serving/deploying_with_docker.html
+
+services:
+  sentinel-image-qa:
+    image: sentinel-image-qa:v1.0.0
+    container_name: sentinel-image-qa
+    command: ["streamlit", "run", "app.py", "--server.port=8501", "--server.address=0.0.0.0"]
+    build:
+      context: .
+      dockerfile: Dockerfile
+      ssh:
+        - default
+    ports:
+      - "8501:8501"
+    volumes:
+      - ".:/sentinel-workspace"
+      - "~/.cache/huggingface:/root/.cache/huggingface"
+    # interactive communication support
+    stdin_open: true
+    tty: true
+    # GPU support
+    deploy:
+      resources:
+        reservations:
+          devices:
+            - driver: nvidia
+              count: all
+              capabilities: [gpu]
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:8501/_stcore/health"]
+      interval: 30s
+      timeout: 20s
+      retries: 3
