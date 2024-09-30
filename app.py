@@ -3,35 +3,47 @@ import logging
 import streamlit as st
 import streamlit_cropper
 from PIL import Image
-from streamlit_cropper import st_cropper
+
+from vlm import HF_Qwen2_VL
 
 logging.basicConfig(level=logging.INFO)
 
 st.set_page_config(layout="centered")
+
 
 def _recommended_box2(img: Image, aspect_ratio: tuple) -> dict:
     width, height = img.size
     return {
         "left": int(10),
         "top": int(10),
-        "width": int(width - 30),
-        "height": int(height - 30),
+        "width": int(width - 10),
+        "height": int(height - 10),
     }
 
+
+@st.cache_resource
+def init_llm():
+    llm = HF_Qwen2_VL()
+    return llm
+
+
 class ImageQA_GUI:
-    def __init__(self):
+    def __init__(self) -> None:
         streamlit_cropper._recommended_box = _recommended_box2
-        
+        self.llm = init_llm()
+
         self.init_sidebar()
         self.init_main()
 
     def init_sidebar(self):
         # logo
         st.sidebar.image("assets/sentinel_logo_white.png", use_column_width=True)
-        
+
         # file uploader
-        st.session_state["input_image"] = st.sidebar.file_uploader("Chose image to analyze...", type="jpeg")
-    
+        st.session_state["input_image"] = st.sidebar.file_uploader(
+            "Chose image to analyze...", type="jpeg"
+        )
+
     def init_main(self):
         st.markdown(
             """
@@ -51,7 +63,7 @@ class ImageQA_GUI:
             </style>
             <div class="title">Image QA</div>
             <div class="description">
-                Local assistant for image understanding and vision question answering tasks.
+                Local assistant for image understanding and visual question answering tasks.
             </div>
             """,
             unsafe_allow_html=True,
@@ -68,24 +80,21 @@ class ImageQA_GUI:
             uploaded_img = uploaded_img.resize((new_width, new_height))
 
             with st.empty():
-                cropped_img = st_cropper(
-                    uploaded_img,
-                    box_color="#f20604",
-                    realtime_update=False,
-                    aspect_ratio=(16, 9),
-                )
-            st.session_state["cropped_img"] = cropped_img
+                st.image(uploaded_img, use_column_width=True)
+
+            st.session_state["pil_image"] = uploaded_img
 
         with st.form("my_form"):
             question = st.text_area("Enter your question:")
             submitted = st.form_submit_button("Submit")
 
             if question and submitted:
-                answer = "I'm sorry, I don't know the answer to that question."
+                answer = self.llm.generate(st.session_state["pil_image"], question)
 
                 # Display the question and response in a chatbot-style box
                 st.chat_message("user").write(question)
                 st.chat_message("assistant").write(answer)
+
 
 if __name__ == "__main__":
     interface = ImageQA_GUI()
