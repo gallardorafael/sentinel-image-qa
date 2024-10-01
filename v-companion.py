@@ -105,7 +105,9 @@ class VCompanion_GUI:
             uploaded_img = uploaded_img.resize((new_width, new_height))
 
             st.session_state["pil_image"] = uploaded_img
-            st.session_state.messages.append({"role": "user", "content": uploaded_img})
+            st.session_state.messages.append(
+                {"role": "user", "content": uploaded_img, "avatar": self.user_avatar}
+            )
             # update uploader key to avoid multiple messages
             self._update_uploader_key()
 
