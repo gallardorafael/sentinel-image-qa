@@ -11,16 +11,6 @@ logging.basicConfig(level=logging.INFO)
 st.set_page_config(layout="centered")
 
 
-def _recommended_box2(img: Image, aspect_ratio: tuple) -> dict:
-    width, height = img.size
-    return {
-        "left": int(10),
-        "top": int(10),
-        "width": int(width - 10),
-        "height": int(height - 10),
-    }
-
-
 @st.cache_resource
 def init_llm():
     llm = HF_Qwen2_Chatbot()
@@ -38,7 +28,6 @@ def load_assets():
 
 class VCompanion_GUI:
     def __init__(self) -> None:
-        streamlit_cropper._recommended_box = _recommended_box2
         self.llm = init_llm()
         self.user_avatar, self.assistant_avatar, self.logo = load_assets()
 
