@@ -144,7 +144,6 @@ class HF_Qwen2_Chatbot(HF_Qwen2_VLM):
 
         # generate the response based on the prompt and the chat context
         formatted_chat_context = self.chat_context.get_chat_context()
-        print(formatted_chat_context)
         response = self.generate(messages=formatted_chat_context)
 
         # adding the response to the chat context
