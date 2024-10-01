@@ -6,7 +6,7 @@ from PIL import Image
 from qwen_vl_utils import process_vision_info
 from transformers import AutoProcessor, Qwen2VLForConditionalGeneration
 
-from .prompts import DEFAULT_CHAT_PROMPT, DEFAULT_NO_IMAGE_RESPONSE
+from .chat_utils import Qwen2ChatContext
 
 logging.basicConfig(level=logging.INFO)
 
@@ -122,86 +122,35 @@ class HF_Qwen2_Chatbot(HF_Qwen2_VLM):
         min_pixels: Optional[int] = 256 * 28 * 28,
         max_pixels: Optional[int] = 1280 * 28 * 28,
         max_tokens: Optional[int] = 256,
-        force_image: Optional[bool] = False,
     ) -> None:
+        """"""
         super().__init__(model_name, min_pixels, max_pixels, max_tokens)
 
-        self.system_prompt = DEFAULT_CHAT_PROMPT
-        self.chat_context: List[Dict[str, Any]] = self._init_system_prompt()
-        self.is_image_set = False
-        self.force_image = force_image
+        self.chat_context = Qwen2ChatContext()
 
     def chat(
         self,
         prompt: str,
         image: Optional[Union[str, Image.Image]] = None,
-        return_stream: Optional[bool] = True,
     ) -> str:
         """"""
-        # return a message indicating that the image is required
-        if self.force_image:
-            if image is None and not self.is_image_set:
-                return DEFAULT_NO_IMAGE_RESPONSE
+        # if only an image was received, update the image context
+        if image is not None:
+            logging.info("Updating image context.")
+            self.chat_context.update_image_context(prompt, image)
 
-        # add the image to the context if it is not set
-        if image is not None and not self.is_image_set:
-            self._add_image_to_context(image, prompt)
-            self.is_image_set = True
-            return self.generate(messages=self.chat_context)
-
-        # generate the message
-        message = {
-            "role": "user",
-            "content": [
-                {
-                    "type": "text",
-                    "text": prompt,
-                },
-            ],
-        }
+        # add the message to the chat context
+        self.chat_context.add_user_message(prompt)
 
         # generate the response based on the prompt and the chat context
-        self.chat_context.append(message)
-        response = self.generate(messages=self.chat_context)
+        formatted_chat_context = self.chat_context.get_chat_context()
+        print(formatted_chat_context)
+        response = self.generate(messages=formatted_chat_context)
 
         # adding the response to the chat context
-        self.add_assistant_message(response)
+        self.chat_context.add_assistant_message(response)
 
         return response
 
-    def add_assistant_message(self, message: str) -> None:
-        """"""
-        message = {
-            "role": "system",
-            "content": message,
-        }
-        self.chat_context.append(message)
-
-    def _add_image_to_context(self, image: Union[str, Image.Image], prompt: str) -> None:
-        """"""
-        message = {
-            "role": "user",
-            "content": [
-                {
-                    "type": "image",
-                    "image": image,
-                },
-                {
-                    "type": "text",
-                    "text": prompt,
-                },
-            ],
-        }
-        self.chat_context.append(message)
-
-    def _init_system_prompt(self):
-        return [
-            {
-                "role": "system",
-                "content": self.system_prompt,
-            },
-        ]
-
     def reset_chat_context(self):
-        self.chat_context = self._init_system_prompt()
-        self.is_image_set = False
+        self.chat_context.reset_context()
