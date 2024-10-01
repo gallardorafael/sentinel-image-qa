@@ -36,7 +36,7 @@ def load_assets():
     return user_avatar, assistant_avatar, sentinel_logo
 
 
-class ImageQA_GUI:
+class VCompanion_GUI:
     def __init__(self) -> None:
         streamlit_cropper._recommended_box = _recommended_box2
         self.llm = init_llm()
@@ -83,7 +83,7 @@ class ImageQA_GUI:
                 margin-bottom: 30px;
             }
             </style>
-            <div class="title">Image QA</div>
+            <div class="title">V-Companion</div>
             <div class="description">
                 Local assistant for image understanding and visual question answering tasks.
             </div>
@@ -136,4 +136,4 @@ class ImageQA_GUI:
 
 
 if __name__ == "__main__":
-    interface = ImageQA_GUI()
+    interface = VCompanion_GUI()
