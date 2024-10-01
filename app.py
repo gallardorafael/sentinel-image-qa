@@ -27,17 +27,27 @@ def init_llm():
     return llm
 
 
+@st.cache_data
+def load_assets():
+    user_avatar = Image.open("assets/avatars/user.png")
+    assistant_avatar = Image.open("assets/avatars/assistant.png")
+    sentinel_logo = Image.open("assets/sentinel_logo_white.png")
+
+    return user_avatar, assistant_avatar, sentinel_logo
+
+
 class ImageQA_GUI:
     def __init__(self) -> None:
         streamlit_cropper._recommended_box = _recommended_box2
         self.llm = init_llm()
+        self.user_avatar, self.assistant_avatar, self.logo = load_assets()
 
         self.init_sidebar()
         self.init_main()
 
     def init_sidebar(self):
         # logo
-        st.sidebar.image("assets/sentinel_logo_white.png", use_column_width=True)
+        st.sidebar.image(self.logo, use_column_width=True)
 
         # file uploader
         if "uploader_key" not in st.session_state:
@@ -101,21 +111,25 @@ class ImageQA_GUI:
 
         # showing all the messages
         for message in st.session_state.messages:
-            with st.chat_message(message["role"]):
+            with st.chat_message(message["role"], avatar=message["avatar"]):
                 if isinstance(message["content"], Image.Image):
                     st.image(message["content"])
                 elif isinstance(message["content"], str):
                     st.markdown(message["content"])
 
         if prompt := st.chat_input("Ask anything"):
-            st.session_state.messages.append({"role": "user", "content": prompt})
-            with st.chat_message("user"):
+            st.session_state.messages.append(
+                {"role": "user", "content": prompt, "avatar": self.user_avatar}
+            )
+            with st.chat_message("user", avatar=self.user_avatar):
                 st.markdown(prompt)
 
-            with st.chat_message("assistant"):
+            with st.chat_message("assistant", avatar=self.assistant_avatar):
                 response = self.llm.chat(prompt, image=st.session_state.get("pil_image"))
                 st.write(response)
-            st.session_state.messages.append({"role": "assistant", "content": response})
+            st.session_state.messages.append(
+                {"role": "assistant", "content": response, "avatar": self.assistant_avatar}
+            )
 
     def _update_uploader_key(self):
         st.session_state.uploader_key += 1
