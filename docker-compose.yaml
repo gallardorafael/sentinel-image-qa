@@ -6,10 +6,10 @@
 # with intented usage similar to: https://docs.vllm.ai/en/latest/serving/deploying_with_docker.html
 
 services:
-  sentinel-image-qa:
-    image: sentinel-image-qa:v1.0.0
-    container_name: sentinel-image-qa
-    command: ["streamlit", "run", "app.py", "--server.port=8501", "--server.address=0.0.0.0"]
+  sentinel-v-companion:
+    image: sentinel-v-companion:v1.0.0
+    container_name: sentinel-v-companion
+    command: ["streamlit", "run", "v-companion.py", "--server.port=8501", "--server.address=0.0.0.0"]
     build:
       context: .
       dockerfile: Dockerfile
