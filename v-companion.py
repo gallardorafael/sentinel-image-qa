@@ -1,10 +1,10 @@
 import logging
 
 import streamlit as st
-import streamlit_cropper
 from PIL import Image
 
 from vlm import HF_Qwen2_Chatbot
+from vlm.chat_utils import simulate_stream
 
 logging.basicConfig(level=logging.INFO)
 
@@ -116,8 +116,9 @@ class VCompanion_GUI:
                 st.markdown(prompt)
 
             with st.chat_message("assistant", avatar=self.assistant_avatar):
-                response = self.llm.chat(prompt, image=st.session_state.get("pil_image"))
-                st.markdown(response)
+                with st.status("", expanded=True):
+                    response = self.llm.chat(prompt, image=st.session_state.get("pil_image"))
+                    st.write_stream(simulate_stream(response))
             st.session_state.messages.append(
                 {"role": "assistant", "content": response, "avatar": self.assistant_avatar}
             )
