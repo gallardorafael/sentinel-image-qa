@@ -117,7 +117,7 @@ class VCompanion_GUI:
 
             with st.chat_message("assistant", avatar=self.assistant_avatar):
                 response = self.llm.chat(prompt, image=st.session_state.get("pil_image"))
-                st.write(response)
+                st.markdown(response)
             st.session_state.messages.append(
                 {"role": "assistant", "content": response, "avatar": self.assistant_avatar}
             )
