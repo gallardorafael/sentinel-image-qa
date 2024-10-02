@@ -1,4 +1,5 @@
 import logging
+import re
 from typing import Any, Dict, List, Optional, Union
 
 import torch
@@ -6,7 +7,7 @@ from PIL import Image
 from qwen_vl_utils import process_vision_info
 from transformers import AutoProcessor, Qwen2VLForConditionalGeneration
 
-from .chat_utils import Qwen2ChatContext
+from .chat_utils import Qwen2ChatMemoryBuffer
 
 logging.basicConfig(level=logging.INFO)
 
@@ -123,17 +124,34 @@ class HF_Qwen2_Chatbot(HF_Qwen2_VLM):
         max_pixels: Optional[int] = 1280 * 28 * 28,
         max_tokens: Optional[int] = 256,
     ) -> None:
-        """"""
+        """
+        Initialize a chatbot based on the Qwen2-VL multimodal model. The only attribute of this
+        class is the chat context, which is a basic memory buffer implementation.
+        Args:
+            model_name (Optional[str], optional): Model name. Defaults to "Qwen/Qwen2-VL-2B-Instruct".
+            min_pixels (Optional[int], optional): Minimum number of pixels. Defaults to 256 * 28 * 28.
+            max_pixels (Optional[int], optional): Maximum number of pixels. Defaults to 1280 * 28 * 28.
+            max_tokens (Optional[int], optional): Maximum number of tokens. Defaults to 256.
+        """
         super().__init__(model_name, min_pixels, max_pixels, max_tokens)
 
-        self.chat_context = Qwen2ChatContext()
+        self.chat_context = Qwen2ChatMemoryBuffer()
 
     def chat(
         self,
         prompt: str,
         image: Optional[Union[str, Image.Image]] = None,
+        format_latex: Optional[bool] = True,
     ) -> str:
-        """"""
+        """Chat with the assistant. The assistant will generate a response based on the prompt, the
+        context image and the chat context in self.chat_context.
+
+        Args:
+            prompt (str): User prompt.
+            image (Optional[Union[str, Image.Image]], optional): Image. Defaults to None.
+        Returns:
+            str: Assistant response.
+        """
         # if only an image was received, update the image context
         if image is not None:
             logging.info("Updating image context.")
@@ -146,10 +164,38 @@ class HF_Qwen2_Chatbot(HF_Qwen2_VLM):
         formatted_chat_context = self.chat_context.get_chat_context()
         response = self.generate(messages=formatted_chat_context)
 
+        if format_latex:
+            response = self._format_equations_to_latex(response)
+
+        logging.info(f"Chat context: {formatted_chat_context}")
+
         # adding the response to the chat context
         self.chat_context.add_assistant_message(response)
 
         return response
 
     def reset_chat_context(self):
+        """Reset the chat context.
+
+        Use this function to clear the chat history and start a fresh conversation.
+        """
         self.chat_context.reset_context()
+
+    def _format_equations_to_latex(self, response: str) -> str:
+        """Qwen2-VL outputs for normal text, lists and code, but Streamlit fails to parse the math
+        (latex) outputs correctly, so this function replaces:
+
+        - substrings in the format \\(...\\) with $...$
+        - substrings in the format \\[...\\] with $...$
+
+        Args:
+            strings (List[str]): List of strings to process.
+        Returns:
+            The processed string.
+        """
+        response = re.sub(r"\\\[", "$", response)
+        response = re.sub(r"\\\]", "$", response)
+        response = re.sub(r"\\\(", "$", response)
+        response = re.sub(r"\\\)", "$", response)
+
+        return response
