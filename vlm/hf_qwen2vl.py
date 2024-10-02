@@ -122,7 +122,7 @@ class HF_Qwen2_Chatbot(HF_Qwen2_VLM):
         model_name: Optional[str] = "Qwen/Qwen2-VL-2B-Instruct",
         min_pixels: Optional[int] = 256 * 28 * 28,
         max_pixels: Optional[int] = 1280 * 28 * 28,
-        max_tokens: Optional[int] = 256,
+        max_tokens: Optional[int] = 1024,
     ) -> None:
         """
         Initialize a chatbot based on the Qwen2-VL multimodal model. The only attribute of this
