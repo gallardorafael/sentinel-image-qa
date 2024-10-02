@@ -1,3 +1,4 @@
+import time
 from typing import Any, Dict, List, Union
 
 from PIL import Image
@@ -104,3 +105,9 @@ class Qwen2ChatMemoryBuffer:
             self.image_message: Dict[str, Any] = None
         except Exception:
             return False
+
+
+def simulate_stream(static_response: str):
+    for word in static_response.split(" "):
+        yield word + " "
+        time.sleep(0.03)
