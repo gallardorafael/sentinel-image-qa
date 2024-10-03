@@ -1,4 +1,0 @@
-services:
-  sentinel-v-companion:
-    volumes:
-      - "absolute-path-to-your-datasets:absolute-path-to-your-datasets"
