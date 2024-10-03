@@ -146,5 +146,4 @@ class VCompanion_GUI:
 
 
 if __name__ == "__main__":
-    """Main entry point for the Streamlit app."""
     interface = VCompanion_GUI()
