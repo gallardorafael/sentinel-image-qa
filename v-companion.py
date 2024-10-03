@@ -1,4 +1,5 @@
 import logging
+from typing import Tuple
 
 import streamlit as st
 from PIL import Image
@@ -12,13 +13,21 @@ st.set_page_config(layout="centered")
 
 
 @st.cache_resource
-def init_llm():
+def init_llm() -> HF_Qwen2_Chatbot:
+    """Initialize the Qwen2-VL chatbot, which includes loading the weights into the GPU memory.
+
+    Using st.cache_resource to avoid loading the model multiple times.
+    """
     llm = HF_Qwen2_Chatbot()
     return llm
 
 
 @st.cache_data
-def load_assets():
+def load_assets() -> Tuple[Image.Image, Image.Image, Image.Image]:
+    """Load all the assets required for the GUI.
+
+    Using st.cache_data to avoid loading the assets multiple times.
+    """
     user_avatar = Image.open("assets/avatars/user.png")
     assistant_avatar = Image.open("assets/avatars/assistant.png")
     sentinel_logo = Image.open("assets/sentinel_logo_white.png")
@@ -28,6 +37,7 @@ def load_assets():
 
 class VCompanion_GUI:
     def __init__(self) -> None:
+        """Initialize the V-Companion GUI, which includes the chatbot interface and the sidebar."""
         self.llm = init_llm()
         self.user_avatar, self.assistant_avatar, self.logo = load_assets()
 
@@ -35,6 +45,10 @@ class VCompanion_GUI:
         self.init_main()
 
     def init_sidebar(self):
+        """Sidebar interface for the V-Companion chatbot.
+
+        It includes the file uploader and the reset button.
+        """
         # logo
         st.sidebar.image(self.logo, use_column_width=True)
 
@@ -56,6 +70,10 @@ class VCompanion_GUI:
             self._update_uploader_key()
 
     def init_main(self):
+        """Main interface for the V-Companion chatbot.
+
+        It includes the management of the chat history and the interaction with the chatbot.
+        """
         st.markdown(
             """
             <style>
@@ -128,4 +146,5 @@ class VCompanion_GUI:
 
 
 if __name__ == "__main__":
+    """Main entry point for the Streamlit app."""
     interface = VCompanion_GUI()
