@@ -25,9 +25,17 @@ On the left sidebar, you will find two buttons:
 
 ## Performance notes
 
-I did some real basic testing to check the performance of the modules, so you have an idea on how fast this is.
+Test environment:
+- os: pop-os 22.04
+- inference hardware: NVIDIA GeForce RTX 4060 Laptop GPU
 
-### Text feature extraction
+Task 1:
+- generating the answer for the prompt "Tell me more about the Vietnam war", max tokens is 1024. No image context.
+- Results: 50 tokens (words) per second.
+
+Task 2:
+- generating the answer for the prompt "Tell me more about the Vietnam war", max tokens is 1024. With an image context with size 1900x1200 pixeles.
+- Results: 32 tokens (words) per second.
 
 
 ## Roadmap for 2.x
@@ -43,4 +51,4 @@ Here are some ideas that I would like to implement for the 2.x version of SENTIN
 ## Acknowledgments
 
 - Thanks to the [Qwen2-VL](https://qwenlm.github.io/blog/qwen2-vl/) team for all the effort they put into the research and development of this model, it is truly amazing and powerful. Kudos for making this open-source!
-- Thanks to [Streamit.io](https://github.com/streamlit/streamlit) for open-sourcing this great tool. This allowed me to create a stable and good-looking GUI without any formal knowledge on front-end development.
+- Thanks to [Streamlit.io](https://github.com/streamlit/streamlit) for open-sourcing this great tool. This allowed me to create a stable and good-looking GUI without any formal knowledge on front-end development.
