@@ -4,7 +4,13 @@ SENTINEl V-Companion is a fully local, open-source multi-modal and multi-languag
 traditional text-based problems but also image-based ones, such as image understanding and image reasoning. This project allows the user to interact with a powerful
 language model that is able to understand both images and text, without requiring suscriptions, internet connection and without any of your data leaving your computer.
 
-Demo video:
+Demo video 1:
+
+https://github.com/user-attachments/assets/516f1c94-cf5b-46d0-ba06-faa8ff33ead3
+
+Demo video 2:
+
+https://github.com/user-attachments/assets/bc2994e7-53bc-4543-8ef1-2678a490c273
 
 ## Set up
 
