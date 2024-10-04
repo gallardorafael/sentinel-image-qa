@@ -1,6 +1,6 @@
 # SENTINEL V-Companion
 
-SENTINEl V-Companion is a fully local, open-source multi-modal and multi-language assistant that leverages the power of the [Qwen2-VL](https://qwenlm.github.io/blog/qwen2-vl/) vision-language model to solve
+SENTINEL V-Companion is a fully local, open-source multi-modal and multi-language assistant that leverages the power of the [Qwen2-VL](https://qwenlm.github.io/blog/qwen2-vl/) vision-language model to solve
 traditional text-based problems but also image-based ones, such as image understanding and image reasoning. This project allows the user to interact with a powerful
 language model that is able to understand both images and text, without requiring suscriptions, internet connection and without any of your data leaving your computer.
 
