@@ -123,7 +123,7 @@ class HF_Qwen2_Chatbot(HF_Qwen2_VLM):
         min_pixels: Optional[int] = 256 * 28 * 28,
         max_pixels: Optional[int] = 1280 * 28 * 28,
         max_tokens: Optional[int] = 1024,
-        max_context_tokens: Optional[int] = 1024,
+        max_context_tokens: Optional[int] = 2056,
     ) -> None:
         """
         Initialize a chatbot based on the Qwen2-VL multimodal model. The only attribute of this
@@ -136,7 +136,7 @@ class HF_Qwen2_Chatbot(HF_Qwen2_VLM):
         """
         super().__init__(model_name, min_pixels, max_pixels, max_tokens)
 
-        self.chat_context = Qwen2ChatMemoryBuffer(max_context_tokens=2056)
+        self.chat_context = Qwen2ChatMemoryBuffer(max_context_tokens=max_context_tokens)
 
     def chat(
         self,
