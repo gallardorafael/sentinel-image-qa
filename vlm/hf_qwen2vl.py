@@ -5,7 +5,11 @@ from typing import Any, Dict, List, Optional, Union
 import torch
 from PIL import Image
 from qwen_vl_utils import process_vision_info
-from transformers import AutoProcessor, Qwen2VLForConditionalGeneration
+from transformers import (
+    AutoProcessor,
+    BitsAndBytesConfig,
+    Qwen2VLForConditionalGeneration,
+)
 
 from .chat_utils import Qwen2ChatMemoryBuffer
 from .defaults import DEFAULT_MODEL_NAME
@@ -20,6 +24,7 @@ class HF_Qwen2_VLM:
         min_pixels: Optional[int] = 256 * 28 * 28,
         max_pixels: Optional[int] = 1280 * 28 * 28,
         max_tokens: Optional[int] = 256,
+        quantize: Optional[bool] = True,
     ) -> None:
         """Initialize the model.
 
@@ -33,6 +38,7 @@ class HF_Qwen2_VLM:
         logging.info(f"Using device: {self.device}")
 
         self.max_tokens = max_tokens
+        self.quantize = quantize
 
         self._init_model(model_name, min_pixels, max_pixels)
 
@@ -49,8 +55,12 @@ class HF_Qwen2_VLM:
         """
         # initializing the model
         try:
+            quantization_config = None
+            if self.quantize:
+                quantization_config = BitsAndBytesConfig(load_in_8bit=True)
+
             self.vlm = Qwen2VLForConditionalGeneration.from_pretrained(
-                model_name, torch_dtype="auto", device_map="auto"
+                model_name, torch_dtype="auto", quantization_config=quantization_config
             )
             logging.info(f"Model {model_name} loaded.")
         except Exception as e:
@@ -126,6 +136,7 @@ class HF_Qwen2_Chatbot(HF_Qwen2_VLM):
         max_pixels: Optional[int] = 1280 * 28 * 28,
         max_tokens: Optional[int] = 1024,
         max_context_tokens: Optional[int] = 2056,
+        quantize: Optional[bool] = True,
     ) -> None:
         """
         Initialize a chatbot based on the Qwen2-VL multimodal model. The only attribute of this
@@ -136,7 +147,7 @@ class HF_Qwen2_Chatbot(HF_Qwen2_VLM):
             max_pixels (Optional[int], optional): Maximum number of pixels. Defaults to 1280 * 28 * 28.
             max_tokens (Optional[int], optional): Maximum number of tokens. Defaults to 256.
         """
-        super().__init__(model_name, min_pixels, max_pixels, max_tokens)
+        super().__init__(model_name, min_pixels, max_pixels, max_tokens, quantize)
 
         self.chat_context = Qwen2ChatMemoryBuffer(max_context_tokens=max_context_tokens)
 
