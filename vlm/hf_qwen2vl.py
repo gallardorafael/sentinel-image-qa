@@ -8,6 +8,7 @@ from qwen_vl_utils import process_vision_info
 from transformers import AutoProcessor, Qwen2VLForConditionalGeneration
 
 from .chat_utils import Qwen2ChatMemoryBuffer
+from .defaults import DEFAULT_MODEL_NAME
 
 logging.basicConfig(level=logging.INFO)
 
@@ -15,7 +16,7 @@ logging.basicConfig(level=logging.INFO)
 class HF_Qwen2_VLM:
     def __init__(
         self,
-        model_name: Optional[str] = "Qwen/Qwen2-VL-2B-Instruct",
+        model_name: Optional[str] = DEFAULT_MODEL_NAME,
         min_pixels: Optional[int] = 256 * 28 * 28,
         max_pixels: Optional[int] = 1280 * 28 * 28,
         max_tokens: Optional[int] = 256,
@@ -23,7 +24,7 @@ class HF_Qwen2_VLM:
         """Initialize the model.
 
         Args:
-            model_name (Optional[str], optional): Model name. Defaults to "Qwen/Qwen2-VL-2B-Instruct".
+            model_name (Optional[str], optional): Model name. Defaults to DEFAULT_MODEL_NAME.
             min_pixels (Optional[int], optional): Minimum number of pixels. Defaults to 256 * 28 * 28.
             max_pixels (Optional[int], optional): Maximum number of pixels. Defaults to 1280 * 28 * 28.
             max_tokens (Optional[int], optional): Maximum number of tokens. Defaults to 256.
@@ -51,6 +52,7 @@ class HF_Qwen2_VLM:
             self.vlm = Qwen2VLForConditionalGeneration.from_pretrained(
                 model_name, torch_dtype="auto", device_map="auto"
             )
+            logging.info(f"Model {model_name} loaded.")
         except Exception as e:
             raise Exception(f"Could not load model {model_name}. Error: {e}")
 
@@ -119,7 +121,7 @@ class HF_Qwen2_VLM:
 class HF_Qwen2_Chatbot(HF_Qwen2_VLM):
     def __init__(
         self,
-        model_name: Optional[str] = "Qwen/Qwen2-VL-2B-Instruct",
+        model_name: Optional[str] = DEFAULT_MODEL_NAME,
         min_pixels: Optional[int] = 256 * 28 * 28,
         max_pixels: Optional[int] = 1280 * 28 * 28,
         max_tokens: Optional[int] = 1024,
@@ -129,7 +131,7 @@ class HF_Qwen2_Chatbot(HF_Qwen2_VLM):
         Initialize a chatbot based on the Qwen2-VL multimodal model. The only attribute of this
         class is the chat context, which is a basic memory buffer implementation.
         Args:
-            model_name (Optional[str], optional): Model name. Defaults to "Qwen/Qwen2-VL-2B-Instruct".
+            model_name (Optional[str], optional): Model name. Defaults to DEFAULT_MODEL_NAME.
             min_pixels (Optional[int], optional): Minimum number of pixels. Defaults to 256 * 28 * 28.
             max_pixels (Optional[int], optional): Maximum number of pixels. Defaults to 1280 * 28 * 28.
             max_tokens (Optional[int], optional): Maximum number of tokens. Defaults to 256.

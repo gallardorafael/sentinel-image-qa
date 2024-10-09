@@ -1,3 +1,4 @@
+import logging
 from typing import Dict, Optional, Union
 
 from PIL import Image
@@ -5,11 +6,13 @@ from qwen_vl_utils import process_vision_info
 from transformers import AutoProcessor
 from vllm import LLM, SamplingParams
 
+from .defaults import DEFAULT_MODEL_NAME
+
 
 class vLLM_Qwen2_VL:
     def __init__(
         self,
-        model_name: Optional[str] = "Qwen/Qwen2-VL-2B-Instruct",
+        model_name: Optional[str] = DEFAULT_MODEL_NAME,
         sampling_params: Optional[dict] = {
             "temperature": 0.1,
             "top_p": 0.001,
@@ -24,7 +27,7 @@ class vLLM_Qwen2_VL:
         """Wrapper for Qwen2-VL vision-language model, over vLLM.
 
         Args:
-            model_name (str, optional): Model name to use. Defaults to "Qwen/Qwen2-VL-2B-Instruct".
+            model_name (str, optional): Model name to use. Defaults to DEFAULT_MODEL_NAME.
             sampling_params (dict, optional): Sampling parameters. Defaults to {
                 "temperature": 0.1,
                 "top_p": 0.001,
@@ -45,6 +48,7 @@ class vLLM_Qwen2_VL:
             model=model_name,
             limit_mm_per_prompt=limits,
         )
+        logging.info(f"Model {model_name} loaded.")
 
         self.sampling_params = SamplingParams(**sampling_params)
 
