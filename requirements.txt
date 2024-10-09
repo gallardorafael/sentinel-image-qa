@@ -4,3 +4,4 @@ streamlit-cropper
 pillow
 git+https://github.com/huggingface/transformers@v4.45.1
 accelerate>=0.26.0
+bitsandbytes>0.37.0

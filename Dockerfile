@@ -20,6 +20,6 @@ COPY . /sentinel-workspace
 
 RUN pip install --upgrade pip
 
-RUN pip3 install streamlit streamlit-cropper qwen-vl-utils
+RUN pip3 install streamlit streamlit-cropper qwen-vl-utils bitsandbytes>0.37.0
 
 ENTRYPOINT []
